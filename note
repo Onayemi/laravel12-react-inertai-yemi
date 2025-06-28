@@ -1,0 +1,316 @@
+pnpm dlx shadcn@latest add https://tailark.com/r/hero-section-4.json
+
+npx shadcn@latest add https://tailark.com/r/hero-section-4.json
+
+https://twblocks.com
+
+Note: React icons
+react-icons.github.io/react-icons check for arrow
+
+npm install react-icons --save
+
+php artisan storage:link
+
+   ## Instal lodash
+    npm i lodash
+    npm i --save-dev @types/lodash
+
+========= Beginning of RoleMiddleware =============
+
+## Create Middleware for protecting pages
+
+php artisan make:middleware RoleMiddleware
+
+App/Http/Middleware/RoleMiddleware.php ---> location
+
+public function handle(Request $request, Closure $next, ...$roles): Response
+{
+if(!Auth::check() || !in_array(Auth::user()->role, $roles)) {
+        return response()->view('errors.unauthorized');
+    }
+    return $next($request);
+}
+
+web.php
+use App\Http\Middleware\RoleMiddleware;
+
+Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
+    Route::get('admin/users', [TestController::class, 'admin'])->name('admin.users');
+});
+Route::middleware(['auth', 'verified', 'role:superadmin'])->group(function () {
+    Route::get('superadmin/system', [TestController::class, 'superadmin'])->name('superadmin.system');
+});
+
+php artisan optimize
+
+## Register the middleware 
+# Register the middleware in bootstrap/app.php
+
+use App\Http\Middleware\RoleMiddleware;
+
+$middleware->alias([
+'role' => RoleMiddleware::class,
+]);
+
+resouces/views/errors/unauthorized.blade.php
+# search for: 403 unauthorized html css code
+
+## Notification
+
+# add it in http/middleware/HandleInertiaRequest.php
+'flash' => [
+    'message' => fn () => $request->session()->get('message')
+],
+
+Install shadcn soonner
+Add <Toaster /> to resources/js/layouts/app-layout.tsx
+
+{children}
+<Toaster position='top-right' richColors />
+
+index.tsx
+const { flash } = usePage<{ flash: { message?: string } }>().props;
+
+useEffect(() => {
+if(flash.message){
+toast.success(flash.message);
+}
+}, [flash.message]);
+
+create.tsx
+post('/posts', {
+onSuccess: () => {
+toast.success('Product has been created.');
+reset();
+},
+// onError: () => {
+// toast.error('Posts has not been created.');
+// },
+});
+
+========= Ending of RoleMiddleware =============
+
+=============== Beginning of cors.php ================
+# for cors.php generate in laravel  12
+Options 1:
+In bootstrap/app.php
+
+use Illuminate\Http\Middleware\HandleCors; // Make sure this is imported
+
+// Cors settings
+        $middleware->prepend(HandleCors::class, function (HandleCors $cors) {
+            $cors->from('http://localhost:5173') // Your React dev server URL
+                 ->allowMethods(['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'])
+                 ->allowHeaders(['Content-Type', 'Authorization', 'X-Requested-With'])
+                 ->allowCredentials(); // Important for Sanctum/session authentication
+        });
+
+Option 2: Manually Create config/cors.php
+Paste the following content into config/cors.php and adjust the values as needed:
+
+<?php
+
+return [
+    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'allowed_methods' => ['*'],
+    'allowed_origins' => ['http://localhost:5173', 'http://127.0.0.1:5173'], // Your React dev server URL
+    'allowed_origins_patterns' => [],
+    'allowed_headers' => ['*'],
+    'exposed_headers' => [],
+    'max_age' => 0,
+    'supports_credentials' => true,
+];
+
+# Reference the config in bootstrap/app.php
+use Illuminate\Http\Middleware\HandleCors; // Make sure this is imported
+
+// Prepend the HandleCors middleware
+$middleware->prepend(HandleCors::class);
+
+// php artisan config:clear
+// php artisan cache:clear
+// php artisan optimize:clear
+
+# Ensure withCredentials in your React Axios/Fetch calls:
+
+import axios from 'axios';
+
+axios.defaults.withCredentials = true;
+================== End of Cors.php =============
+
+This worked for me, hope it helps
+Restart the server
+npm run build
+
+npx shadcn@latest add sonner
+npx shadcn@latest add toast
+npm install sonner
+
+import { Toaster } from "@/components/ui/sonner"
+<Toaster />
+
+import { toast } from "sonner"
+toast("Event has been created.")
+
+<Toaster position="top-right" richColors />
+
+# slider
+npx motion-primitives@latest add infinite-slider
+npm install motion clsx tailwind-merge
+
+================== Beginning of Jodit =============
+npm install jodit-react html-react-parser
+npm install --save-dev @types/react
+
+import JoditEditor from 'jodit-react';
+// import 'jodit/build/jodit.min.css'; // Import Jodit styles
+import parse from 'html-react-parser';
+
+const Content: React.FC<MyEditorProps> = ({ initialContent = '', placeholder = 'Start typing...' }) => {
+    const editor = useRef(null); // Type the ref with Jodit instance
+    // const editor = useRef<Jodit | null>(null); // Type the ref with Jodit instance
+    const [content, setContent] = useState<string>(initialContent);
+
+    // Configure Jodit editor options
+    // Use JoditConfig for type safety for the config object
+    // const config: JoditConfig = useMemo(
+    const config = useMemo(
+        () => ({
+            readonly: false,
+            placeholder: placeholder,
+            height: 400,
+            // Add more Jodit options as needed (refer to Jodit documentation)
+        }),
+        [placeholder],
+    );
+
+    const handleBlur = (newContent: string) => {
+        setContent(newContent);
+    };
+
+    return (
+        <>
+         <JoditEditor
+            ref={editor}
+            value={content}
+            config={config}
+            onBlur={handleBlur} // Use onBlur to update content for performance
+            onChange={() => {}} // onChange can be debounced or used for real-time updates
+        />
+
+        {parse(content)}
+        </>
+    )
+
+}
+
+================== End of Jodit =============
+
+
+$validated = $request->validate([
+            'prod_name' => 'required|string|max:225',
+            // 'lname' => 'required|string|max:225',
+            // 'description' => 'required|string|max:1000',
+            'price' => 'required|numeric|min:0',
+            'featured_image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+            'featured_image_original_name' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+        ]);
+        // dd($request->all());
+
+        $userId = Auth::user()->id;
+        // dd($request->all(), $userId);
+
+        try {
+            $featuredImage= null;
+            if($request->file('featured_image')) {
+                $featuredImage = $request->file('featured_image');
+                $featuredImageOriginalName = $featuredImage->getClientOriginalName();
+                $featuredImage = $featuredImage->store('products', 'public');
+            }
+
+            $product = Product::create([
+                'user_id' => Auth::user()->id,
+                'prod_name' => $request->prod_name,
+                'price' => $request->price,
+                'featured_image' => $featuredImage, //$featuredImage,
+                'featured_image_original_name' => $featuredImageOriginalName
+            ]);
+            // dd($product);
+
+            if($product){
+                return redirect()->route('products.index'); //->with('success', 'Product Added Successfully');
+            }
+            return redirect()->back(); //->with('errors', 'Unable to create Product, please try again');
+        } catch (Exception $e) {
+            Log::error('Product Creation failed: ' . $e->getMessage());
+        }
+
+check video #30 on time 17:53
+
+
+----------- Table -------------
+<div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+                <div className="rounded border p-6 shadow-xl">
+                    <div className="mb-5 flex items-center justify-between">
+                        <div className="relative w-full sm:w-1/3">
+                            <Input id={'search'} className="peer ps-9" placeholder="Search..." type="search" onChange={onSearchChange} />
+                            <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50">
+                                <Search size={16} aria-hidden="true" />
+                            </div>
+                        </div>
+                        <Button asChild>
+                            <Link href="/posts/create" prefetch>
+                                Create Post
+                            </Link>
+                        </Button>
+                    </div>
+                    <Card>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableCell>#</TableCell>
+                                        <TableCell>Image</TableCell>
+                                        <TableCell>Title</TableCell>
+                                        <TableCell>Content</TableCell>
+                                        <TableCell>Category</TableCell>
+                                        <TableCell>Status</TableCell>
+                                        <TableCell>Actions</TableCell>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {posts.data?.map((post, index) => (
+                                        <TableRow key={post.id}>
+                                            <TableCell>{index + 1}</TableCell>
+                                            <TableCell>
+                                                <img src={`/storage/${post.image}`} alt={post.title} className="w-10 rounded" />
+                                            </TableCell>
+                                            <TableCell>{post.title}</TableCell>
+                                            <TableCell>{post.content.substring(0, 35)}</TableCell>
+                                            <TableCell>{post.category}</TableCell>
+                                            <TableCell>
+                                                {post.status == '0' ? (
+                                                    <Badge className="bg-red-500">Inactive</Badge>
+                                                ) : (
+                                                    <Badge className="bg-green-700">Active</Badge>
+                                                )}
+                                            </TableCell>
+                                            <TableCell className="space-x-1">
+                                                <Button asChild size={'sm'} variant={'default'}>
+                                                    <Link href={`/posts/${post.id}/edit`} prefetch>
+                                                        <PencilIcon size={8} />
+                                                    </Link>
+                                                </Button>
+                                                <Button onClick={() => deletePost(post.id)} size={'sm'} variant={'destructive'}>
+                                                    <Trash2 size={8} className="text-white" />
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                    <InertiaPagination posts={posts} />
+                </div>
+            </div>
